@@ -40,6 +40,7 @@ class ArtistsTest < ActionDispatch::IntegrationTest
     assert_equal "Bob Dylan", json["name"]
     assert_equal 10, json["number_of_grammies"]
     assert_equal "The folk singer", json["bio"]
+    assert json["albums"]
   end
 
   def test_cannot_create_artist_without_bio
@@ -61,5 +62,18 @@ class ArtistsTest < ActionDispatch::IntegrationTest
     # Test that there is one error on bio (either one works)
     assert_equal 1, json["bio"].length
     assert_equal ["can't be blank"], json["bio"]
+  end
+
+  def test_index_of_artists_with_albums_include_the_albums
+    3.times do
+      FactoryGirl.create(:artist_with_albums)
+    end
+
+    get '/artists.json'
+
+    json = JSON.parse(response.body)
+
+    first_artist = json.first
+    assert_not_equal [], first_artist["albums"]
   end
 end
